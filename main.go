@@ -41,16 +41,15 @@ func readJSONFile(filename string) Config {
 // 通过阿里云的 SDK 添加一条 DNS TXT 解析记录，返回记录的 RecordId，后续删除时需要用到它
 func addDomainRecord(client *alidns.Client, domain string, domainName string, value string) {
 	request := alidns.CreateAddDomainRecordRequest()
-	domainName = strings.Replace(domainName, "."+domain, "", 1)
 	request.DomainName = domain
 	request.Type = "TXT"
-	if len(domainName) > 0 {
-		request.RR = "_acme-challenge." + domainName
-	} else {
+	if domainName == domain {
 		request.RR = "_acme-challenge"
+	} else {
+		domainName = strings.Replace(domainName, "."+domain, "", 1)
+		request.RR = "_acme-challenge." + domainName
 	}
 	request.Value = value
-
 	response, err := client.AddDomainRecord(request)
 	if err != nil {
 		fmt.Print(err.Error())
